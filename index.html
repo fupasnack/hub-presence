@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Presensi FUPA — Masuk</title>
+
+  <!-- Color & PWA meta -->
+  <meta name="theme-color" content="#FFD54F" />
+  <link rel="manifest" href="manifest.webmanifest" />
+
+  <!-- Material Symbols (hosted) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@0..1&opsz=24..48&wght@300..700" rel="stylesheet">
+
+  <!-- Fonts (hosted) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#FFF59D; /* light yellow */
+      --bg2:#FFD54F; /* vibrant yellow */
+      --bg3:#FFC107; /* amber */
+      --ink:#2E2A1F; /* warm dark */
+      --muted:#6A5F3B;
+      --accent:#00C853; /* green for success */
+      --warn:#FFC400;   /* yellow for late */
+      --danger:#D32F2F; /* red for alpa */
+      --glass: rgba(255,255,255,0.55);
+      --glass-stroke: rgba(255,255,255,0.85);
+      --shadow: 0 10px 30px rgba(0,0,0,0.12);
+      --radius: 16px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 600px at 20% -10%, #FFFFFF88, transparent 60%),
+        linear-gradient(135deg, var(--bg1), var(--bg2) 55%, var(--bg3));
+      overflow:hidden;
+    }
+
+    /* Animated shine layer */
+    .shine{
+      position:fixed; inset:0; pointer-events:none; mix-blend-mode:soft-light;
+      background:
+        radial-gradient(800px 300px at 80% 10%, rgba(255,255,255,0.7), transparent 60%),
+        radial-gradient(600px 250px at 10% 80%, rgba(255,255,255,0.35), transparent 60%);
+      animation: shimmer 10s ease-in-out infinite alternate;
+      filter: blur(0.3px);
+    }
+    @keyframes shimmer{
+      0%{transform: translate3d(0,0,0)}
+      100%{transform: translate3d(-2%,2%,0)}
+    }
+
+    /* Falling leaves */
+    .leaves{position:fixed; inset:0; pointer-events:none; overflow:hidden;}
+    .leaf{
+      position:absolute; top:-10vh;
+      font-family: "Material Symbols Rounded";
+      color:#8BC34A; opacity:0.85; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.12));
+      animation: fall linear forwards;
+      will-change: transform;
+    }
+    @keyframes fall{
+      0%{transform: translateY(-10vh) rotate(0deg)}
+      100%{transform: translateY(115vh) rotate(360deg)}
+    }
+
+    .container{
+      position:relative; height:100%; display:grid; place-items:center; padding:16px;
+    }
+    .card{
+      width:min(92vw, 420px);
+      backdrop-filter: blur(10px) saturate(120%);
+      background: var(--glass);
+      border:1px solid var(--glass-stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:22px 20px 16px;
+      transform: translateY(10px);
+      animation: pop 650ms cubic-bezier(.2,.8,.2,1) both;
+    }
+    @keyframes pop{from{opacity:0; transform: translateY(30px) scale(.98)} to{opacity:1; transform: translateY(10px) scale(1)}}
+
+    .brand{
+      display:flex; align-items:center; gap:10px; margin:4px 2px 8px;
+    }
+    .brand .logo{
+      width:44px; height:44px; display:grid; place-items:center; border-radius:12px;
+      background: linear-gradient(135deg, #FFFDE7, #FFE082);
+      box-shadow: inset 0 0 0 1px #ffffff, 0 6px 18px rgba(0,0,0,0.08);
+    }
+    .brand h1{
+      font-family:Poppins, Inter, sans-serif; font-weight:700; font-size:1.25rem; letter-spacing:.3px; margin:0;
+    }
+    .sub{color:var(--muted); font-size:.9rem; margin:0 2px 14px}
+
+    form{display:grid; gap:12px; margin-top:4px}
+    .field{
+      display:grid; gap:6px;
+    }
+    .label{
+      font-size:.88rem; font-weight:600; letter-spacing:.2px;
+    }
+    .input{
+      display:flex; align-items:center; gap:8px;
+      background:#fff; border:1px solid #F5F5F5; border-radius:12px; padding:12px 12px;
+      outline:none; transition:border-color .2s, box-shadow .2s;
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,0.03);
+    }
+    .input:focus-within{border-color:#FFE082; box-shadow:0 0 0 4px rgba(255,224,130,0.35)}
+    .input input{
+      width:100%; border:none; outline:none; font-size:1rem; background:transparent; color:var(--ink);
+    }
+    .icon{font-family:"Material Symbols Rounded"; font-variation-settings:"FILL" 0,"wght" 600,"GRAD" 0,"opsz" 24; font-size:22px; color:#6D5F2A}
+    .toggle-pass{cursor:pointer; user-select:none}
+
+    .row{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:8px}
+    .hint{font-size:.85rem; color:#5D5130}
+    .link{color:#5D5130; text-decoration:underline dotted}
+
+    .actions{display:grid; gap:10px; margin-top:8px}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      background: linear-gradient(135deg, #FFEE58, #FFC107);
+      color:#4E3F00; font-weight:700; border:none; border-radius:14px; padding:12px 14px; cursor:pointer;
+      box-shadow: 0 10px 20px rgba(255,193,7,0.25), inset 0 0 0 1px rgba(255,255,255,0.9);
+      transition: transform .08s ease, box-shadow .2s ease;
+    }
+    .btn:active{transform: translateY(1px); box-shadow: 0 6px 12px rgba(255,193,7,0.2), inset 0 0 0 1px rgba(255,255,255,0.9)}
+
+    .note{
+      font-size:.85rem; color:#5D5130; margin-top:6px; text-align:center
+    }
+
+    /* Loader overlay */
+    .loader{
+      position:fixed; inset:0; display:none; place-items:center; background:rgba(255,248,225,0.55); z-index:50;
+      backdrop-filter: blur(4px);
+    }
+    .loader.active{display:grid}
+    .spinner{
+      width:72px; height:72px; border-radius:50%;
+      background:
+        conic-gradient(from 0deg, #FFC107, #FFE082, #FFF59D, #FFC107);
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 12px), #000 calc(100% - 11px));
+      animation: spin 1s linear infinite;
+      position:relative;
+    }
+    .spinner::after{
+      content:""; position:absolute; inset:-10px; border-radius:inherit; filter: blur(10px);
+      background: radial-gradient(closest-side, rgba(255,255,255,0.8), transparent);
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes spin{to{transform: rotate(1turn)}}
+    @keyframes pulse{0%,100%{opacity:.4}50%{opacity:.9}}
+
+    /* Footer small tips */
+    .footer{
+      text-align:center; font-size:.8rem; color:#614F1B; margin-top:12px;
+    }
+
+    /* Small responsive tweak */
+    @media (min-width: 768px){
+      .card{padding:26px 24px 18px}
+    }
+  </style>
+</head>
+<body>
+  <div class="shine" aria-hidden="true"></div>
+  <div class="leaves" aria-hidden="true" id="leaves"></div>
+
+  <div class="container">
+    <div class="card" role="region" aria-label="Form masuk presensi">
+      <div class="brand">
+        <div class="logo">
+          <span class="icon" style="font-size:28px">travel_explore</span>
+        </div>
+        <h1>Presensi FUPA</h1>
+      </div>
+      <p class="sub">Silakan masuk menggunakan akun yang sudah terdaftar.</p>
+
+      <form id="loginForm" autocomplete="on">
+        <div class="field">
+          <label class="label" for="email">Email</label>
+          <div class="input">
+            <span class="icon">mail</span>
+            <input id="email" name="email" type="email" inputmode="email" placeholder="nama@fupa.id" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="password">Kata sandi</label>
+          <div class="input">
+            <span class="icon">lock</span>
+            <input id="password" name="password" type="password" placeholder="********" minlength="6" required />
+            <span class="icon toggle-pass" id="togglePass" title="Tampilkan/sembunyikan">visibility</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="hint">Jika mengalami kendala akses, hubungi admin.</div>
+          <div class="link" id="forgot">Lupa sandi? Hubungi admin</div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn" id="btnLogin">
+            <span class="icon">login</span>
+            Masuk
+          </button>
+        </div>
+
+        <div class="note" id="msg" role="status" aria-live="polite"></div>
+      </form>
+
+      <div class="footer">
+        Tips: aktifkan notifikasi agar pengumuman segera muncul.
+      </div>
+    </div>
+  </div>
+
+  <!-- Loader -->
+  <div class="loader" id="loader">
+    <div class="spinner" aria-label="Memuat"></div>
+  </div>
+
+  <script type="module">
+    // Falling leaves generator (lightweight)
+    const leavesC = document.getElementById('leaves');
+    const LEAF_ICONS = ['spa','eco','yard','park'];
+    function spawnLeaf(){
+      const el = document.createElement('div');
+      el.className='leaf';
+      el.textContent=LEAF_ICONS[Math.floor(Math.random()*LEAF_ICONS.length)];
+      const size = 18 + Math.random()*18;
+      const dur = 8 + Math.random()*10;
+      const left = Math.random()*100;
+      el.style.left = left + 'vw';
+      el.style.fontSize = size + 'px';
+      el.style.animationDuration = dur + 's';
+      el.style.opacity = (0.6 + Math.random()*0.35).toFixed(2);
+      leavesC.appendChild(el);
+      setTimeout(()=> el.remove(), dur*1000);
+    }
+    setInterval(spawnLeaf, 650);
+
+    // Toggle password
+    const pass = document.getElementById('password');
+    document.getElementById('togglePass').addEventListener('click', ()=>{
+      const is = pass.type === 'password';
+      pass.type = is ? 'text' : 'password';
+    });
+
+    // Loader control
+    const loader = document.getElementById('loader');
+    const showLoader = (on=true)=> loader.classList.toggle('active', on);
+
+    // Firebase v9+ modular (hosted)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence, signOut } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+    // Firebase config (dari Anda)
+    const firebaseConfig = {
+      apiKey: "AIzaSyA-xV3iuv-KAE_-xhiXZSPCTn54EgYUD40",
+      authDomain: "presensi-online-f0964.firebaseapp.com",
+      projectId: "presensi-online-f0964",
+      storageBucket: "presensi-online-f0964.firebasestorage.app",
+      messagingSenderId: "895308244103",
+      appId: "1:895308244103:web:ab240a8be762a44f49c422",
+      measurementId: "G-E9C7760C2S"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Hard role mapping by UID (admin & karyawan)
+    const ADMIN_UIDS = new Set([
+      "odO8ZtMgTKeao0SDuy9L3gUmkx02", // annisa@fupa.id
+      "ujHnWTnftGh6scTI8cQyN8fhmOB2"  // karomi@fupa.id
+    ]);
+    const KARY_UIDS = new Set([
+      "HD4EsoL2ykgwQeBl6RP1WfrcCKw1", // cabang1@fupa.id
+      "FD69ceLyhqedlBfhbLb2I0TljY03", // cabang2@fupa.id
+      "h5aw8ppJSgP9PQM0Oc2HtugUAH02"  // cabang3@fupa.id
+    ]);
+
+    // Persist session to speed login
+    setPersistence(auth, browserLocalPersistence);
+
+    // DOM
+    const form = document.getElementById('loginForm');
+    const msg = document.getElementById('msg');
+
+    function tell(text, type='info'){
+      msg.textContent = text;
+      msg.style.color = type==='error' ? '#8B1A1A' : '#5D5130';
+    }
+
+    // Notif permission (local notification)
+    async function ensureNotificationPermission(){
+      if (!('Notification' in window)) return;
+      if (Notification.permission === 'default'){
+        try{ await Notification.requestPermission(); }catch(e){}
+      }
+    }
+
+    // Fire a local notification helper
+    function localNotify(title, body){
+      if ('Notification' in window && Notification.permission === 'granted'){
+        new Notification(title, {
+          body,
+          icon: 'https://fonts.gstatic.com/s/i/materialiconsoutlined/notifications/24px.svg',
+          badge: 'https://fonts.gstatic.com/s/i/materialiconsoutlined/notifications/24px.svg',
+          silent: true
+        });
+      }
+    }
+
+    // Bootstrap minimal Firestore structure after first login (idempotent)
+    async function bootstrapFirestore(uid, role){
+      const settingsDoc = doc(db, 'settings', 'global');
+      const exist = await getDoc(settingsDoc);
+      const batch = writeBatch(db);
+
+      if (!exist.exists()){
+        batch.set(settingsDoc, {
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          // Preset hari wajib presensi (Senin–Sabtu true, Minggu false)
+          hariWajib: {
+            0: false, 1: true, 2: true, 3: true, 4: true, 5: true, 6: true
+          },
+          // Batas waktu (24h) berangkat & pulang
+          jam: {
+            berangkat: { start: "04:30", end: "05:30", toleransiMenit: 30 },
+            pulang: { start: "10:00", end: "11:00", toleransiMenit: 30 }
+          }
+        });
+      }
+
+      // Buat profil pengguna jika belum ada
+      const pRef = doc(db, 'profiles', uid);
+      const p = await getDoc(pRef);
+      if (!p.exists()){
+        batch.set(pRef, {
+          displayName: "",
+          address: "",
+          photoURL: "",
+          role,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      }
+
+      // Siapkan koleksi kontrol pengumuman & cuti (doc anchor agar ada path)
+      const anchors = [
+        doc(db, 'anchors', 'announcements'),
+        doc(db, 'anchors', 'leaves'),
+        doc(db, 'anchors', 'attendance')
+      ];
+      anchors.forEach(d => batch.set(d, { alive:true, updatedAt: serverTimestamp() }));
+
+      await batch.commit();
+    }
+
+    function roleOf(uid){
+      if (ADMIN_UIDS.has(uid)) return 'admin';
+      if (KARY_UIDS.has(uid)) return 'karyawan';
+      // Default fallback: treat as karyawan unless extended later
+      return 'karyawan';
+    }
+
+    async function postLoginRouting(user){
+      const uid = user.uid;
+      const role = roleOf(uid);
+
+      // Initialize base structure (no manual setup needed)
+      await bootstrapFirestore(uid, role);
+
+      // Session flags for guard on next pages
+      localStorage.setItem('presensi_uid', uid);
+      localStorage.setItem('presensi_role', role);
+      localStorage.setItem('presensi_lastLogin', String(Date.now()));
+
+      await ensureNotificationPermission();
+      localNotify("Selamat datang", "Anda berhasil masuk.");
+
+      // Strict role routing
+      if (role === 'admin'){
+        location.replace('admin.html');
+      } else {
+        location.replace('karyawan.html');
+      }
+    }
+
+    // Fast-path if already signed in
+    onAuthStateChanged(auth, (user)=>{
+      if (user){
+        // Double check mapping; if mismatch, sign out to avoid bypass
+        const mapped = roleOf(user.uid);
+        const cachedRole = localStorage.getItem('presensi_role');
+        if (cachedRole && cachedRole !== mapped){
+          signOut(auth);
+          localStorage.clear();
+          return;
+        }
+        postLoginRouting(user);
+      }
+    });
+
+    // Submit handler
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      tell("");
+      const email = (document.getElementById('email').value || '').trim();
+      const password = document.getElementById('password').value || '';
+      if (!email || !password){
+        tell("Email dan kata sandi wajib diisi.", 'error');
+        return;
+      }
+
+      try{
+        showLoader(true);
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        await postLoginRouting(cred.user);
+      }catch(err){
+        console.error(err);
+        tell("Gagal masuk. Periksa kembali data Anda atau hubungi admin.", 'error');
+        showLoader(false);
+        // Brief attention shake
+        form.animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}], {duration:300, iterations:1});
+      }
+    });
+
+    // PWA: register service worker
+    if ('serviceWorker' in navigator){
+      window.addEventListener('load', ()=>{
+        navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "Presensi FUPA",
+  "short_name": "FUPA Presensi",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#FFD54F",
+  "theme_color": "#FFD54F",
+  "description": "Presensi karyawan dan admin FUPA dengan autentikasi, kamera, GPS, dan notifikasi.",
+  "icons": [
+    {
+      "src": "https://cdn.jsdelivr.net/gh/twitter/twemoji/assets/72x72/1f31e.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn.jsdelivr.net/gh/twitter/twemoji/assets/72x72/2600.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

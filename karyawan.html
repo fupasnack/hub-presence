@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Presensi FUPA — Karyawan</title>
+  <meta name="theme-color" content="#FFD54F" />
+  <link rel="manifest" href="manifest.webmanifest" />
+
+  <!-- Material Symbols (hosted) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@0..1&opsz=24..48&wght@300..700" rel="stylesheet">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#FFF59D; --bg2:#FFD54F; --bg3:#FFC107;
+      --ink:#2E2A1F; --muted:#6A5F3B;
+      --accent:#00C853; --warn:#FFC400; --danger:#D32F2F;
+      --glass: rgba(255,255,255,0.55);
+      --glass-stroke: rgba(255,255,255,0.85);
+      --shadow: 0 10px 30px rgba(0,0,0,0.12);
+      --radius: 16px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--ink);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:
+        radial-gradient(1200px 600px at 20% -10%, #FFFFFF88, transparent 60%),
+        linear-gradient(135deg, var(--bg1), var(--bg2) 55%, var(--bg3));
+      overflow-x:hidden;
+    }
+    .shine{position:fixed; inset:0; pointer-events:none; mix-blend-mode:soft-light;
+      background:
+        radial-gradient(800px 300px at 80% 10%, rgba(255,255,255,0.7), transparent 60%),
+        radial-gradient(600px 250px at 10% 80%, rgba(255,255,255,0.35), transparent 60%);
+      animation: shimmer 10s ease-in-out infinite alternate; filter: blur(0.3px);
+    }
+    @keyframes shimmer{0%{transform:translate3d(0,0,0)} 100%{transform:translate3d(-2%,2%,0)}}
+    .leaves{position:fixed; inset:0; pointer-events:none; overflow:hidden}
+    .leaf{position:absolute; top:-10vh; font-family:"Material Symbols Rounded"; color:#8BC34A; opacity:0.85; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.12)); animation: fall linear forwards}
+    @keyframes fall{0%{transform: translateY(-10vh) rotate(0)} 100%{transform: translateY(115vh) rotate(360deg)}}
+
+    header{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:12px 14px; position:sticky; top:0; z-index:20;
+      backdrop-filter: blur(8px) saturate(120%); background: var(--glass);
+      border-bottom:1px solid var(--glass-stroke);
+    }
+    .brand{display:flex; align-items:center; gap:10px}
+    .logo{width:36px; height:36px; display:grid; place-items:center; border-radius:10px; background:linear-gradient(135deg, #FFFDE7, #FFE082); box-shadow: inset 0 0 0 1px #fff, 0 6px 18px rgba(0,0,0,0.08)}
+    .brand h1{font-family:Poppins, Inter, sans-serif; font-weight:700; margin:0; font-size:1.05rem}
+    .toolbar{display:flex; align-items:center; gap:8px}
+    .icon-btn{appearance:none; border:none; background:#fff; border:1px solid #F2E8B8; color:#6D5F2A; border-radius:12px; box-shadow: var(--shadow); width:40px; height:40px; display:grid; place-items:center; cursor:pointer}
+
+    main{padding:12px 14px 80px; display:grid; gap:14px}
+    .card{
+      backdrop-filter: blur(10px) saturate(120%);
+      background: var(--glass);
+      border:1px solid var(--glass-stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .grow{flex:1}
+
+    .clock{font-size:1.2rem; font-weight:700}
+    .time-sub{color:var(--muted); font-size:.9rem}
+
+    .gps{display:flex; flex-direction:column; gap:6px}
+    .gps .coord{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size:.95rem}
+
+    .camera{display:grid; gap:10px}
+    .camera .preview{position:relative; overflow:hidden; border-radius:12px; border:1px solid #F2E8B8; background:#fff}
+    video, canvas, img.capture{width:100%; height:auto; display:block}
+    .cam-actions{display:flex; gap:10px; justify-content:space-between}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      background: linear-gradient(135deg, #FFEE58, #FFC107);
+      color:#4E3F00; font-weight:700; border:none; border-radius:12px; padding:10px 12px; cursor:pointer;
+      box-shadow: 0 10px 18px rgba(255,193,7,0.22), inset 0 0 0 1px rgba(255,255,255,0.9);
+      transition: transform .08s ease, box-shadow .2s ease;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn.secondary{background:#fff}
+    .status-badge{display:inline-flex; align-items:center; gap:6px; font-weight:700; padding:6px 8px; border-radius:999px; border:1px solid #F2E8B8; background:#fff}
+
+    .mini-history{display:grid; gap:8px}
+    .mini-item{display:flex; justify-content:space-between; align-items:center; border:1px dashed #F2E8B8; border-radius:12px; padding:8px 10px; background:#fff}
+    .mini-item .left{display:flex; align-items:center; gap:8px}
+    .material{font-family:"Material Symbols Rounded"; font-variation-settings:"FILL" 0,"wght" 600,"GRAD" 0,"opsz" 24}
+
+    /* Floating actions (FAB) */
+    .fab{
+      position: fixed; bottom: 18px; right: 16px; z-index: 30;
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .fab .btn{width:56px; height:56px; border-radius:16px}
+    .fab .btn .material{font-size:26px}
+
+    /* Popups */
+    .overlay{position:fixed; inset:0; background:rgba(0,0,0,0.22); display:none; place-items:center; z-index:40; backdrop-filter: blur(2px)}
+    .overlay.active{display:grid}
+    .popup{
+      width:min(94vw, 520px); max-height:80vh; overflow:auto;
+      border-radius:18px; background:var(--glass); border:1px solid var(--glass-stroke); box-shadow: var(--shadow);
+      padding:14px; animation: pop .35s ease both;
+    }
+    @keyframes pop{from{opacity:0; transform: translateY(16px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
+    .popup h3{margin:0 0 10px; font-family:Poppins; font-size:1.05rem}
+    .field{display:grid; gap:6px; margin-bottom:10px}
+    .label{font-size:.9rem; font-weight:600}
+    .input{display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #F5F5F5; border-radius:12px; padding:10px 12px}
+    .input input, .input textarea, .input select{width:100%; border:none; outline:none; background:transparent; font-size:1rem}
+    .row-end{display:flex; gap:8px; justify-content:flex-end}
+
+    .toast{position:fixed; bottom:85px; left:50%; transform:translateX(-50%); background:#2E2A1F; color:#fff; padding:10px 12px; border-radius:12px; font-size:.9rem; display:none; z-index:60}
+    .toast.show{display:block}
+
+    /* Loader small */
+    .loader{display:none}
+    .loader.show{display:inline-block; width:18px; height:18px; border-radius:50%; background: conic-gradient(#FFC107, #FFF59D, #FFC107); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); animation: spin 1s linear infinite}
+    @keyframes spin{to{transform: rotate(1turn)}}
+
+    /* Status colors */
+    .mark-green{color:#00C853}
+    .mark-yellow{color:#FFC400}
+    .mark-red{color:#D32F2F}
+
+    @media (min-width: 900px){
+      .grid-2{display:grid; grid-template-columns: 1fr 1fr; gap:14px}
+    }
+  </style>
+</head>
+<body>
+  <div class="shine" aria-hidden="true"></div>
+  <div class="leaves" aria-hidden="true" id="leaves"></div>
+
+  <header>
+    <div class="brand">
+      <div class="logo"><span class="material">workspace_premium</span></div>
+      <h1>Area Karyawan</h1>
+    </div>
+    <div class="toolbar">
+      <button class="icon-btn" id="btnNotif" title="Notifikasi"><span class="material">notifications</span></button>
+      <button class="icon-btn" id="btnProfile" title="Profil"><span class="material">account_circle</span></button>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="row">
+        <div class="grow">
+          <div class="clock" id="clock">--:--:--</div>
+          <div class="time-sub" id="dateInfo">Memuat tanggal…</div>
+        </div>
+        <div id="reqInfo" class="status-badge">
+          <span class="material">calendar_month</span>
+          <span id="reqLabel">Kebijakan hari</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="card">
+        <div class="gps">
+          <div class="row">
+            <strong>Lokasi saat ini</strong>
+            <span id="gpsLoad" class="loader"></span>
+          </div>
+          <div class="coord" id="coord">Meminta izin lokasi…</div>
+          <div class="row">
+            <button class="btn secondary" id="btnLoc"><span class="material">my_location</span> Ambil Koordinat</button>
+            <div class="grow"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card camera">
+        <div class="row">
+          <strong>Selfie presensi</strong>
+          <span id="camLoad" class="loader"></span>
+        </div>
+        <div class="preview" id="previewBox">
+          <video id="video" playsinline autoplay muted></video>
+          <img id="snap" class="capture" alt="" style="display:none"/>
+          <canvas id="canvas" style="display:none"></canvas>
+        </div>
+        <div class="cam-actions">
+          <button class="btn secondary" id="btnStartCam"><span class="material">photo_camera</span> Nyalakan Kamera</button>
+          <button class="btn secondary" id="btnSnap" disabled><span class="material">camera</span> Ambil</button>
+          <button class="btn" id="btnUpload" disabled><span class="material">cloud_upload</span> Upload</button>
+        </div>
+        <div class="time-sub" id="uploadHint">Pastikan wajah terlihat jelas.</div>
+      </div>
+    </section>
+
+    <section class="card mini-history">
+      <div class="row">
+        <strong>Riwayat hari ini</strong>
+        <button class="btn secondary" id="btnRefreshMini"><span class="material">refresh</span> Muat ulang</button>
+      </div>
+      <div id="miniList"></div>
+    </section>
+  </main>
+
+  <!-- FAB cuti -->
+  <div class="fab">
+    <button class="btn" id="btnCuti" title="Ajukan cuti"><span class="material">add</span></button>
+  </div>
+
+  <!-- Popup Profil -->
+  <div class="overlay" id="ovProfile">
+    <div class="popup">
+      <div class="row" style="justify-content:space-between; align-items:center">
+        <h3>Profil</h3>
+        <button class="icon-btn" id="closeProfile"><span class="material">close</span></button>
+      </div>
+      <div class="field">
+        <div class="label">Foto profil</div>
+        <div class="row" style="align-items:center; gap:10px">
+          <img id="profilePhoto" alt="Foto profil" style="width:64px; height:64px; border-radius:16px; object-fit:cover; background:#fff; border:1px solid #F2E8B8"/>
+          <input type="file" id="profileFile" accept="image/*" />
+          <span id="pfLoad" class="loader"></span>
+        </div>
+      </div>
+      <div class="field">
+        <div class="label">Nama</div>
+        <div class="input"><input type="text" id="profileName" placeholder="Nama tampilan" /></div>
+      </div>
+      <div class="field">
+        <div class="label">Alamat</div>
+        <div class="input"><textarea id="profileAddr" rows="2" placeholder="Alamat"></textarea></div>
+      </div>
+      <div class="row-end">
+        <button class="btn secondary" id="btnLogout"><span class="material">logout</span> Keluar</button>
+        <button class="btn" id="btnSaveProfile"><span class="material">save</span> Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup Notifikasi -->
+  <div class="overlay" id="ovNotif">
+    <div class="popup">
+      <div class="row" style="justify-content:space-between; align-items:center">
+        <h3>Notifikasi</h3>
+        <button class="icon-btn" id="closeNotif"><span class="material">close</span></button>
+      </div>
+      <div class="field">
+        <div class="label">Pengumuman</div>
+        <div id="listAnn"></div>
+      </div>
+      <div class="field">
+        <div class="label">Status cuti</div>
+        <div id="listLeaves"></div>
+      </div>
+      <div class="row-end">
+        <button class="btn secondary" id="btnReloadNotif"><span class="material">refresh</span> Muat ulang</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup Cuti -->
+  <div class="overlay" id="ovCuti">
+    <div class="popup">
+      <div class="row" style="justify-content:space-between; align-items:center">
+        <h3>Ajukan cuti</h3>
+        <button class="icon-btn" id="closeCuti"><span class="material">close</span></button>
+      </div>
+      <div class="field">
+        <div class="label">Jenis</div>
+        <div class="input">
+          <select id="leaveType">
+            <option value="izin">Izin</option>
+            <option value="sakit">Sakit</option>
+            <option value="cuti">Cuti</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <div class="label">Tanggal mulai</div>
+        <div class="input"><input type="date" id="leaveStart" /></div>
+      </div>
+      <div class="field">
+        <div class="label">Tanggal selesai</div>
+        <div class="input"><input type="date" id="leaveEnd" /></div>
+      </div>
+      <div class="field">
+        <div class="label">Keterangan</div>
+        <div class="input"><textarea id="leaveReason" rows="2" placeholder="Tuliskan alasan singkat"></textarea></div>
+      </div>
+      <div class="row-end">
+        <button class="btn" id="btnSubmitLeave"><span class="material">send</span> Kirim</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">OK</div>
+
+  <script type="module">
+  // Leaves animation
+  const leavesC = document.getElementById('leaves');
+  const LEAF_ICONS = ['spa','eco','yard','park'];
+  function spawnLeaf(){
+    const el = document.createElement('div');
+    el.className='leaf';
+    el.textContent=LEAF_ICONS[Math.floor(Math.random()*LEAF_ICONS.length)];
+    const size = 16 + Math.random()*18;
+    const dur = 8 + Math.random()*10;
+    el.style.left = (Math.random()*100) + 'vw';
+    el.style.fontSize = size + 'px';
+    el.style.animationDuration = dur + 's';
+    el.style.opacity = (0.6 + Math.random()*0.35).toFixed(2);
+    leavesC.appendChild(el);
+    setTimeout(()=> el.remove(), dur*1000);
+  }
+  setInterval(spawnLeaf, 800);
+
+  // Imports
+  import {
+    auth, db, guardPage, ensureNotificationPermission, swNotify,
+    bootstrapUser, getSettings, isAttendanceRequired, evaluateStatus,
+    toISODate, toTime, ensureTodayLog, appendAttendance,
+    getProfile, updateProfile, listAnnouncements, requestLeave
+  } from './app-shared.js';
+  import { signOut } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+  import { doc, getDoc, setDoc, serverTimestamp, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+  // Elements
+  const clockEl = document.getElementById('clock');
+  const dateInfoEl = document.getElementById('dateInfo');
+  const reqInfo = document.getElementById('reqInfo');
+  const reqLabel = document.getElementById('reqLabel');
+  const gpsLoad = document.getElementById('gpsLoad');
+  const coordEl = document.getElementById('coord');
+  const btnLoc = document.getElementById('btnLoc');
+  const camLoad = document.getElementById('camLoad');
+  const btnStartCam = document.getElementById('btnStartCam');
+  const btnSnap = document.getElementById('btnSnap');
+  const btnUpload = document.getElementById('btnUpload');
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const snapImg = document.getElementById('snap');
+  const uploadHint = document.getElementById('uploadHint');
+  const miniList = document.getElementById('miniList');
+  const btnRefreshMini = document.getElementById('btnRefreshMini');
+
+  const btnProfile = document.getElementById('btnProfile');
+  const ovProfile = document.getElementById('ovProfile');
+  const closeProfile = document.getElementById('closeProfile');
+  const btnLogout = document.getElementById('btnLogout');
+  const profilePhoto = document.getElementById('profilePhoto');
+  const profileFile = document.getElementById('profileFile');
+  const profileName = document.getElementById('profileName');
+  const profileAddr = document.getElementById('profileAddr');
+  const btnSaveProfile = document.getElementById('btnSaveProfile');
+  const pfLoad = document.getElementById('pfLoad');
+
+  const btnNotif = document.getElementById('btnNotif');
+  const ovNotif = document.getElementById('ovNotif');
+  const closeNotif = document.getElementById('closeNotif');
+  const listAnn = document.getElementById('listAnn');
+  const listLeaves = document.getElementById('listLeaves');
+  const btnReloadNotif = document.getElementById('btnReloadNotif');
+
+  const btnCuti = document.getElementById('btnCuti');
+  const ovCuti = document.getElementById('ovCuti');
+  const closeCuti = document.getElementById('closeCuti');
+  const leaveType = document.getElementById('leaveType');
+  const leaveStart = document.getElementById('leaveStart');
+  const leaveEnd = document.getElementById('leaveEnd');
+  const leaveReason = document.getElementById('leaveReason');
+  const btnSubmitLeave = document.getElementById('btnSubmitLeave');
+
+  const toast = document.getElementById('toast');
+
+  const CLOUD_NAME = 'dn2o2vf04';
+  const UPLOAD_PRESET = 'presensi_unsigned';
+
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(()=> toast.classList.remove('show'), 2000);
+  }
+
+  // Strict guard
+  const user = await guardPage('karyawan');
+  await bootstrapUser(user.uid, 'karyawan');
+  await ensureNotificationPermission();
+
+  // Server time offset via Firestore
+  let serverOffsetMs = 0;
+  async function syncServerTime(){
+    const tRef = doc(db, '_server', 'time');
+    await setDoc(tRef, { ping: serverTimestamp() }, { merge:true });
+    const snap = await getDoc(tRef);
+    const nowLocal = Date.now();
+    const srv = snap.get('ping');
+    if (srv && srv.toMillis) {
+      serverOffsetMs = srv.toMillis() - nowLocal;
+    }
+  }
+  await syncServerTime();
+  setInterval(syncServerTime, 60_000);
+
+  function nowServer(){
+    return new Date(Date.now() + serverOffsetMs);
+  }
+
+  // Clock UI
+  const settings = await getSettings();
+  function renderClock(){
+    const now = nowServer();
+    clockEl.textContent = toTime(now);
+    const dateISO = toISODate(now);
+    const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    dateInfoEl.textContent = `${days[now.getDay()]}, ${dateISO}`;
+    const required = isAttendanceRequired(now, settings);
+    reqLabel.textContent = required ? 'Wajib presensi' : 'Tidak wajib';
+    reqInfo.style.borderColor = required ? '#00C853' : '#FFC400';
+  }
+  renderClock();
+  setInterval(renderClock, 1000);
+
+  // GPS
+  let latestCoords = null;
+  async function getLocation(){
+    gpsLoad.classList.add('show');
+    return new Promise((resolve)=>{
+      if (!navigator.geolocation){
+        coordEl.textContent = 'Perangkat tidak mendukung GPS.';
+        gpsLoad.classList.remove('show');
+        resolve(null);
+        return;
+      }
+      navigator.geolocation.getCurrentPosition((pos)=>{
+        const { latitude, longitude, accuracy } = pos.coords;
+        latestCoords = { latitude, longitude, accuracy };
+        coordEl.textContent = `Lat: ${latitude.toFixed(6)}, Lng: ${longitude.toFixed(6)} (±${Math.round(accuracy)}m)`;
+        gpsLoad.classList.remove('show');
+        resolve(latestCoords);
+      },(err)=>{
+        coordEl.textContent = 'Izin lokasi ditolak atau gagal. Silakan izinkan lokasi.';
+        gpsLoad.classList.remove('show');
+        resolve(null);
+      },{ enableHighAccuracy:true, timeout:10000, maximumAge:0 });
+    });
+  }
+  btnLoc.addEventListener('click', getLocation);
+  // Ambil awal (tanpa memblok UI)
+  setTimeout(getLocation, 300);
+
+  // Camera
+  let stream = null;
+  let capturedBlob = null;
+  btnStartCam.addEventListener('click', async ()=>{
+    camLoad.classList.add('show');
+    try{
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio:false });
+      video.srcObject = stream;
+      btnSnap.disabled = false;
+      uploadHint.textContent = 'Arahkan wajah ke kamera, lalu klik Ambil.';
+    }catch(e){
+      uploadHint.textContent = 'Izin kamera ditolak atau tidak tersedia.';
+    }finally{
+      camLoad.classList.remove('show');
+    }
+  });
+
+  // Compress + strip metadata helper
+  async function compressImageFromVideo(videoEl, targetMax=1200, quality=0.6){
+    // Draw to canvas
+    const vw = videoEl.videoWidth, vh = videoEl.videoHeight;
+    const scale = Math.min(1, targetMax / Math.max(vw, vh));
+    const w = Math.round(vw * scale);
+    const h = Math.round(vh * scale);
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(videoEl, 0, 0, w, h);
+    // canvas.toBlob drops EXIF (metadata stripped)
+    const blob = await new Promise(res=> canvas.toBlob(res, 'image/jpeg', quality));
+    return blob;
+  }
+
+  // Preview capture
+  btnSnap.addEventListener('click', async ()=>{
+    if (!video.srcObject){
+      showToast('Nyalakan kamera dahulu.');
+      return;
+    }
+    capturedBlob = await compressImageFromVideo(video, 900, 0.55); // cukup kecil dalam KB
+    snapImg.src = URL.createObjectURL(capturedBlob);
+    snapImg.style.display = 'block';
+    video.style.display = 'none';
+    btnUpload.disabled = false;
+    uploadHint.textContent = 'Pratinjau siap. Klik Upload untuk mengirim.';
+  });
+
+  // Determine presensi kind by time window
+  function currentKind(now, settings){
+    const n = now;
+    const m = n.getHours()*60 + n.getMinutes();
+    const bj = settings?.jam?.berangkat;
+    const pj = settings?.jam?.pulang;
+    const toMin = (hhmm)=> {
+      const [h,mm]=hhmm.split(':').map(Number);
+      return h*60+mm;
+    };
+    const bStart = toMin(bj.start), bEnd = toMin(bj.end), pStart = toMin(pj.start), pEnd = toMin(pj.end);
+    if (m <= pEnd){ // pagi hingga siang
+      if (m <= bEnd) return 'berangkat';
+      if (m >= pStart) return 'pulang';
+    }
+    return (m < pStart) ? 'berangkat' : 'pulang';
+  }
+
+  // Upload to Cloudinary unsigned
+  async function uploadToCloudinary(blob){
+    const form = new FormData();
+    form.append('file', blob, 'selfie.jpg');
+    form.append('upload_preset', UPLOAD_PRESET);
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+      method:'POST', body: form
+    });
+    if (!res.ok) throw new Error('Upload gagal');
+    const data = await res.json();
+    return { url: data.secure_url, public_id: data.public_id, bytes: data.bytes };
+  }
+
+  // Mini history
+  async function loadMini(){
+    const now = nowServer();
+    const dateISO = toISODate(now);
+    const ref = doc(db, 'attendance', `${user.uid}_${dateISO}`);
+    const s = await getDoc(ref);
+    miniList.innerHTML = '';
+    if (!s.exists()){
+      miniList.innerHTML = '<div class="time-sub">Belum ada catatan hari ini.</div>';
+      return;
+    }
+    const data = s.data();
+    const recs = Array.isArray(data.records) ? data.records : [];
+    if (!recs.length){
+      miniList.innerHTML = '<div class="time-sub">Belum ada catatan hari ini.</div>';
+      return;
+    }
+    for (const r of recs){
+      const color = r.status==='tepat'?'mark-green':(r.status==='terlambat'?'mark-yellow':'mark-red');
+      const icon = r.kind==='berangkat'?'login':'logout';
+      const el = document.createElement('div');
+      el.className='mini-item';
+      el.innerHTML = `
+        <div class="left">
+          <span class="material">${icon}</span>
+          <div>
+            <div><strong>${r.kind.toUpperCase()}</strong> • <span class="${color}">${r.status}</span></div>
+            <div class="time-sub">${r.time} • ${r.lat?.toFixed? r.lat.toFixed(5) : r.lat}, ${r.lng?.toFixed? r.lng.toFixed(5) : r.lng}</div>
+          </div>
+        </div>
+        <div>
+          ${r.photoURL ? '<span class="material" title="Foto tersimpan">image</span>' : ''}
+        </div>
+      `;
+      miniList.appendChild(el);
+    }
+  }
+  btnRefreshMini.addEventListener('click', loadMini);
+
+  // Initialize profile UI
+  async function initProfile(){
+    const p = await getProfile(user.uid);
+    if (p?.photoURL) profilePhoto.src = p.photoURL;
+    if (p?.displayName) profileName.value = p.displayName;
+    if (p?.address) profileAddr.value = p.address;
+  }
+
+  // Popups
+  function openOv(el){ el.classList.add('active'); }
+  function closeOv(el){ el.classList.remove('active'); }
+
+  btnProfile.addEventListener('click', ()=> openOv(ovProfile));
+  closeProfile.addEventListener('click', ()=> closeOv(ovProfile));
+  btnNotif.addEventListener('click', async ()=>{
+    await loadNotifications();
+    openOv(ovNotif);
+  });
+  closeNotif.addEventListener('click', ()=> closeOv(ovNotif));
+  btnCuti.addEventListener('click', ()=> {
+    const today = toISODate(nowServer());
+    leaveStart.value = today;
+    leaveEnd.value = today;
+    leaveType.value = 'izin';
+    leaveReason.value = '';
+    openOv(ovCuti);
+  });
+  closeCuti.addEventListener('click', ()=> closeOv(ovCuti));
+
+  btnLogout.addEventListener('click', async ()=>{
+    await signOut(auth);
+    localStorage.clear();
+    location.replace('index.html');
+  });
+
+  // Save profile (with optional new photo)
+  profileFile.addEventListener('change', async (e)=>{
+    const file = e.target.files?.[0];
+    if (!file) return;
+    pfLoad.classList.add('show');
+    // Compress + strip metadata through canvas
+    const img = document.createElement('img');
+    const reader = new FileReader();
+    const blob = await new Promise((resolve)=>{
+      reader.onload = ()=>{
+        img.onload = async ()=>{
+          const max = 800;
+          const ratio = Math.min(1, max/Math.max(img.naturalWidth, img.naturalHeight));
+          const w = Math.round(img.naturalWidth*ratio);
+          const h = Math.round(img.naturalHeight*ratio);
+          const cvs = document.createElement('canvas');
+          cvs.width = w; cvs.height = h;
+          const ctx = cvs.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          cvs.toBlob((b)=> resolve(b), 'image/jpeg', 0.7);
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+    try{
+      const up = await uploadToCloudinary(blob);
+      profilePhoto.src = up.url;
+      await updateProfile(user.uid, { photoURL: up.url });
+      showToast('Foto profil diperbarui.');
+    }catch(e){
+      showToast('Gagal mengunggah foto profil.');
+    }finally{
+      pfLoad.classList.remove('show');
+    }
+  });
+
+  btnSaveProfile.addEventListener('click', async ()=>{
+    const displayName = profileName.value.trim();
+    const address = profileAddr.value.trim();
+    await updateProfile(user.uid, { displayName, address });
+    showToast('Profil tersimpan.');
+  });
+
+  // Load notifications (announcements + leaves)
+  async function loadNotifications(){
+    listAnn.innerHTML = '';
+    listLeaves.innerHTML = '';
+    const anns = await listAnnouncements(20);
+    if (!anns.length) listAnn.innerHTML = '<div class="time-sub">Belum ada pengumuman.</div>';
+    for (const a of anns){
+      const el = document.createElement('div');
+      el.className='mini-item';
+      el.innerHTML = `
+        <div class="left">
+          <span class="material">campaign</span>
+          <div>
+            <div><strong>${a.title || 'Pengumuman'}</strong></div>
+            <div class="time-sub">${a.message || ''}</div>
+          </div>
+        </div>`;
+      listAnn.appendChild(el);
+    }
+
+    // Leaves of this user
+    const ql = query(collection(db, 'leaves'), where('uid','==', user.uid), orderBy('createdAt','desc'), limit(20));
+    const s = await getDocs(ql);
+    if (s.empty){
+      listLeaves.innerHTML = '<div class="time-sub">Belum ada pengajuan cuti.</div>';
+    } else {
+      s.forEach(d=>{
+        const v = d.data();
+        const color = v.status==='approved'?'mark-green':(v.status==='rejected'?'mark-red':'mark-yellow');
+        const el = document.createElement('div');
+        el.className='mini-item';
+        el.innerHTML = `
+          <div class="left">
+            <span class="material">event</span>
+            <div>
+              <div><strong>${v.type?.toUpperCase?.()||'CUTI'}</strong> • <span class="${color}">${v.status}</span></div>
+              <div class="time-sub">${v.startDateISO} s.d. ${v.endDateISO}</div>
+              ${v.reason ? `<div class="time-sub">${v.reason}</div>` : ''}
+            </div>
+          </div>`;
+        listLeaves.appendChild(el);
+      });
+    }
+  }
+  btnReloadNotif.addEventListener('click', loadNotifications);
+
+  // Leave submit
+  btnSubmitLeave.addEventListener('click', async ()=>{
+    const type = leaveType.value;
+    const startDateISO = leaveStart.value;
+    const endDateISO = leaveEnd.value || startDateISO;
+    const reason = leaveReason.value.trim();
+    if (!startDateISO){
+      showToast('Pilih tanggal mulai.');
+      return;
+    }
+    await requestLeave({ uid: user.uid, type, startDateISO, endDateISO, reason });
+    swNotify('Pengajuan terkirim', 'Permintaan cuti telah dikirim ke admin.');
+    closeOv(ovCuti);
+    await loadNotifications();
+  });
+
+  // Attendance upload/save
+  btnUpload.addEventListener('click', async ()=>{
+    if (!capturedBlob){
+      showToast('Ambil foto dahulu.');
+      return;
+    }
+    if (!latestCoords){
+      showToast('Ambil lokasi dahulu.');
+      return;
+    }
+    const now = nowServer();
+    const dateISO = toISODate(now);
+
+    // Check day required
+    if (!isAttendanceRequired(now, settings)){
+      showToast('Hari ini tidak wajib presensi.');
+      return;
+    }
+
+    const kind = currentKind(now, settings); // berangkat/pulang
+    const evalRes = evaluateStatus(now, kind, settings);
+    // Jika sebelum start window, tolak (sesuai ketentuan: absen sebelum jam tidak bisa)
+    if (evalRes.reason === 'Belum waktunya'){
+      showToast('Belum masuk jam presensi untuk sesi ini.');
+      return;
+    }
+
+    btnUpload.disabled = true;
+    uploadHint.textContent = 'Mengunggah foto…';
+
+    try{
+      const up = await uploadToCloudinary(capturedBlob);
+      await ensureTodayLog(user.uid, dateISO);
+      await appendAttendance(user.uid, dateISO, {
+        kind,
+        status: evalRes.status, // tepat | terlambat | alpa (di luar toleransi)
+        time: toTime(now),
+        lat: latestCoords.latitude,
+        lng: latestCoords.longitude,
+        accuracy: Math.round(latestCoords.accuracy || 0),
+        photoURL: up.url,
+        cloudinaryId: up.public_id,
+        createdAt: serverTimestamp()
+      });
+      swNotify('Presensi tersimpan', `${kind.toUpperCase()} • ${evalRes.status.toUpperCase()}`);
+      await loadMini();
+      uploadHint.textContent = 'Selesai diunggah.';
+      // reset state
+      btnUpload.disabled = true;
+      if (video.srcObject){
+        snapImg.style.display = 'none';
+        video.style.display = 'block';
+      }
+    }catch(e){
+      uploadHint.textContent = 'Gagal mengunggah. Coba lagi.';
+      btnUpload.disabled = false;
+    }
+  });
+
+  // Initial
+  await initProfile();
+  await loadMini();
+</script>

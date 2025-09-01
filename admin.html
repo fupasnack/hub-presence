@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Presensi FUPA — Admin</title>
+  <meta name="theme-color" content="#FFD54F" />
+  <link rel="manifest" href="manifest.webmanifest" />
+
+  <!-- Material Symbols (hosted) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@0..1&opsz=24..48&wght@300..700" rel="stylesheet">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#FFF59D; --bg2:#FFD54F; --bg3:#FFC107;
+      --ink:#2E2A1F; --muted:#6A5F3B;
+      --accent:#00C853; --warn:#FFC400; --danger:#D32F2F;
+      --glass: rgba(255,255,255,0.55);
+      --glass-stroke: rgba(255,255,255,0.85);
+      --shadow: 0 10px 30px rgba(0,0,0,0.12);
+      --radius: 16px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--ink);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:
+        radial-gradient(1200px 600px at 20% -10%, #FFFFFF88, transparent 60%),
+        linear-gradient(135deg, var(--bg1), var(--bg2) 55%, var(--bg3));
+      overflow-x:hidden;
+    }
+    .shine{position:fixed; inset:0; pointer-events:none; mix-blend-mode:soft-light;
+      background:
+        radial-gradient(800px 300px at 80% 10%, rgba(255,255,255,0.7), transparent 60%),
+        radial-gradient(600px 250px at 10% 80%, rgba(255,255,255,0.35), transparent 60%);
+      animation: shimmer 10s ease-in-out infinite alternate; filter: blur(0.3px);
+    }
+    @keyframes shimmer{0%{transform:translate3d(0,0,0)} 100%{transform:translate3d(-2%,2%,0)}}
+    .leaves{position:fixed; inset:0; pointer-events:none; overflow:hidden}
+    .leaf{position:absolute; top:-10vh; font-family:"Material Symbols Rounded"; color:#8BC34A; opacity:0.85; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.12)); animation: fall linear forwards}
+    @keyframes fall{0%{transform: translateY(-10vh) rotate(0)} 100%{transform: translateY(115vh) rotate(360deg)}}
+
+    header{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:12px 14px; position:sticky; top:0; z-index:20;
+      backdrop-filter: blur(8px) saturate(120%); background: var(--glass);
+      border-bottom:1px solid var(--glass-stroke);
+    }
+    .brand{display:flex; align-items:center; gap:10px}
+    .logo{width:36px; height:36px; display:grid; place-items:center; border-radius:10px; background:linear-gradient(135deg, #FFFDE7, #FFE082); box-shadow: inset 0 0 0 1px #fff, 0 6px 18px rgba(0,0,0,0.08)}
+    .brand h1{font-family:Poppins, Inter, sans-serif; font-weight:700; margin:0; font-size:1.05rem}
+    .toolbar{display:flex; align-items:center; gap:8px}
+    .icon-btn{appearance:none; border:none; background:#fff; border:1px solid #F2E8B8; color:#6D5F2A; border-radius:12px; box-shadow: var(--shadow); width:40px; height:40px; display:grid; place-items:center; cursor:pointer}
+
+    main{padding:12px 14px 100px; display:grid; gap:14px}
+    .card{
+      backdrop-filter: blur(10px) saturate(120%);
+      background: var(--glass);
+      border:1px solid var(--glass-stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .grow{flex:1}
+    .clock{font-size:1.2rem; font-weight:700}
+    .time-sub{color:var(--muted); font-size:.9rem}
+
+    .grid-2{display:grid; gap:14px}
+    @media (min-width: 980px){ .grid-2{grid-template-columns: 1fr 1fr} }
+
+    /* Table */
+    table{width:100%; border-collapse:separate; border-spacing:0 8px}
+    thead th{font-size:.9rem; text-align:left; color:#5D5130}
+    tbody td{background:#fff; border-top:1px solid #F2E8B8; border-bottom:1px solid #F2E8B8; padding:8px 10px}
+    tbody tr td:first-child{border-left:1px solid #F2E8B8; border-top-left-radius:10px; border-bottom-left-radius:10px}
+    tbody tr td:last-child{border-right:1px solid #F2E8B8; border-top-right-radius:10px; border-bottom-right-radius:10px}
+    .chip{display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; border:1px solid #F2E8B8; background:#fff; font-weight:600}
+    .mark-green{color:#00C853} .mark-yellow{color:#FFC400} .mark-red{color:#D32F2F}
+
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      background: linear-gradient(135deg, #FFEE58, #FFC107);
+      color:#4E3F00; font-weight:700; border:none; border-radius:12px; padding:10px 12px; cursor:pointer;
+      box-shadow: 0 10px 18px rgba(255,193,7,0.22), inset 0 0 0 1px rgba(255,255,255,0.9);
+      transition: transform .08s ease, box-shadow .2s ease;
+    }
+    .btn.secondary{background:#fff}
+    .btn:active{transform: translateY(1px)}
+    .btn.small{padding:6px 8px; border-radius:10px}
+    .btn.danger{background: linear-gradient(135deg, #FFCDD2, #E57373); color:#5B0B0B}
+
+    /* Popups */
+    .overlay{position:fixed; inset:0; background:rgba(0,0,0,0.22); display:none; place-items:center; z-index:40; backdrop-filter: blur(2px)}
+    .overlay.active{display:grid}
+    .popup{
+      width:min(94vw, 640px); max-height:80vh; overflow:auto;
+      border-radius:18px; background:var(--glass); border:1px solid var(--glass-stroke); box-shadow: var(--shadow);
+      padding:14px; animation: pop .35s ease both;
+    }
+    @keyframes pop{from{opacity:0; transform: translateY(16px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
+    .popup h3{margin:0 0 10px; font-family:Poppins; font-size:1.05rem}
+    .field{display:grid; gap:6px; margin-bottom:10px}
+    .label{font-size:.9rem; font-weight:600}
+    .input{display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #F5F5F5; border-radius:12px; padding:10px 12px}
+    .input input, .input textarea, .input select{width:100%; border:none; outline:none; background:transparent; font-size:1rem}
+    .row-end{display:flex; gap:8px; justify-content:flex-end}
+    .toast{position:fixed; bottom:85px; left:50%; transform:translateX(-50%); background:#2E2A1F; color:#fff; padding:10px 12px; border-radius:12px; font-size:.9rem; display:none; z-index:60}
+    .toast.show{display:block}
+
+    /* FAB */
+    .fab{
+      position: fixed; bottom: 18px; right: 16px; z-index: 30;
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .fab .btn{width:56px; height:56px; border-radius:16px}
+    .material{font-family:"Material Symbols Rounded"; font-variation-settings:"FILL" 0,"wght" 600,"GRAD" 0,"opsz" 24}
+  </style>
+</head>
+<body>
+  <div class="shine" aria-hidden="true"></div>
+  <div class="leaves" aria-hidden="true" id="leaves"></div>
+
+  <header>
+    <div class="brand">
+      <div class="logo"><span class="material">workspace_premium</span></div>
+      <h1>Area Admin</h1>
+    </div>
+    <div class="toolbar">
+      <button class="icon-btn" id="btnNotif" title="Notifikasi"><span class="material">notifications</span></button>
+      <button class="icon-btn" id="btnProfile" title="Profil & Akun"><span class="material">account_circle</span></button>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="row">
+        <div class="grow">
+          <div class="clock" id="clock">--:--:--</div>
+          <div class="time-sub" id="dateInfo">Memuat tanggal…</div>
+        </div>
+        <div class="chip"><span class="material">tune</span><span id="hariBadge">Kebijakan hari</span></div>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <strong>Permintaan cuti (pending)</strong>
+          <button class="btn secondary small" id="btnReloadLeaves"><span class="material">refresh</span> Muat ulang</button>
+        </div>
+        <div id="leavesList" class="time-sub">Memuat…</div>
+      </div>
+
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <strong>Pengumuman terbaru</strong>
+          <button class="btn secondary small" id="btnReloadAnn"><span class="material">refresh</span> Muat ulang</button>
+        </div>
+        <div id="annList" class="time-sub">Memuat…</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="row" style="flex-wrap:wrap; gap:10px">
+        <strong>Riwayat presensi</strong>
+        <div class="grow"></div>
+        <div class="input"><select id="rangeKind">
+          <option value="harian">Harian</option>
+          <option value="mingguan">Mingguan</option>
+          <option value="bulanan">Bulanan</option>
+          <option value="tahunan">Tahunan</option>
+        </select></div>
+        <div class="input"><input type="date" id="rangeAnchor" /></div>
+        <div class="input"><input type="text" id="filterUid" placeholder="Filter UID..." /></div>
+        <button class="btn secondary small" id="btnApplyFilter"><span class="material">filter_alt</span> Terapkan</button>
+        <button class="btn small" id="btnExport"><span class="material">download</span> CSV</button>
+      </div>
+      <div style="overflow:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>UID</th>
+              <th>Jenis</th>
+              <th>Status</th>
+              <th>Waktu</th>
+              <th>Koordinat</th>
+              <th>Foto</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- FAB pengumuman/kebijakan -->
+  <div class="fab">
+    <button class="btn" id="btnAnn" title="Pengumuman & kebijakan"><span class="material">campaign</span></button>
+  </div>
+
+  <!-- Popup Profil & Create Akun -->
+  <div class="overlay" id="ovProfile">
+    <div class="popup">
+      <div class="row" style="justify-content:space-between; align-items:center">
+        <h3>Profil admin & buat akun</h3>
+        <button class="icon-btn" id="closeProfile"><span class="material">close</span></button>
+      </div>
+
+      <div class="field">
+        <div class="label">Foto profil</div>
+        <div class="row" style="align-items:center; gap:10px">
+          <img id="profilePhoto" alt="Foto profil" style="width:64px; height:64px; border-radius:16px; object-fit:cover; background:#fff; border:1px solid #F2E8B8"/>
+          <input type="file" id="profileFile" accept="image/*" />
+          <span id="pfLoad" class="loader" style="display:none;width:18px;height:18px;border-radius:50%;background: conic-gradient(#FFC107, #FFF59D, #FFC107); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); animation: spin 1s linear infinite"></span>
+        </div>
+      </div>
+      <div class="field">
+        <div class="label">Nama</div>
+        <div class="input"><input type="text" id="profileName" placeholder="Nama tampilan" /></div>
+      </div>
+      <div class="field">
+        <div class="label">Alamat</div>
+        <div class="input"><textarea id="profileAddr" rows="2" placeholder="Alamat"></textarea></div>
+      </div>
+      <div class="row-end" style="margin-bottom:16px">
+        <button class="btn secondary" id="btnLogout"><span class="material">logout</span> Keluar</button>
+        <button class="btn" id="btnSaveProfile"><span class="material">save</span> Simpan</button>
+      </div>
+
+      <hr style="border:none; border-top:1px dashed #E0C766; margin:12px 0">
+
+      <div class="field">
+        <div class="label">Buat akun karyawan (langkah 1)</div>
+        <div class="input"><input type="email" id="newEmail" placeholder="email karyawan" /></div>
+        <div class="input"><input type="password" id="newPassword" placeholder="kata sandi (min 6)" /></div>
+        <button class="btn" id="btnCreateUser"><span class="material">person_add</span> Buat akun</button>
+        <div class="time-sub" id="createInfo">Masukkan email dan kata sandi lalu klik Buat akun.</div>
+      </div>
+      <div class="field">
+        <div class="label">Konfirmasi UID (langkah 2)</div>
+        <div class="input"><input type="text" id="confirmUid" placeholder="ketik UID hasil pembuatan" /></div>
+        <button class="btn secondary" id="btnConfirmUid"><span class="material">verified</span> Konfirmasi UID</button>
+      </div>
+    </div>
+  </div>
+
+<!-- Popup Pengumuman & Kebijakan hari -->
+  <div class="overlay" id="ovAnn">
+    <div class="popup">
+      <div class="row" style="justify-content:space-between; align-items:center">
+        <h3>Pengumuman & kebijakan hari presensi</h3>
+        <button class="icon-btn" id="closeAnn"><span class="material">close</span></button>
+      </div>
+
+      <div class="field">
+        <div class="label">Kebijakan hari aktif (centang = wajib presensi)</div>
+        <div class="row" style="flex-wrap:wrap; gap:8px">
+          <label class="chip"><input type="checkbox" id="dayMon" checked /> Senin</label>
+          <label class="chip"><input type="checkbox" id="dayTue" checked /> Selasa</label>
+          <label class="chip"><input type="checkbox" id="dayWed" checked /> Rabu</label>
+          <label class="chip"><input type="checkbox" id="dayThu" checked /> Kamis</label>
+          <label class="chip"><input type="checkbox" id="dayFri" checked /> Jumat</label>
+          <label class="chip"><input type="checkbox" id="daySat" checked /> Sabtu</label>
+          <label class="chip"><input type="checkbox" id="daySun" /> Minggu</label>
+        </div>
+        <div class="row-end">
+          <button class="btn secondary" id="btnResetDays"><span class="material">restart_alt</span> Reset</button>
+          <button class="btn" id="btnSaveDays"><span class="material">save</span> Simpan kebijakan</button>
+        </div>
+      </div>
+
+      <hr style="border:none; border-top:1px dashed #E0C766; margin:12px 0">
+
+      <div class="field">
+        <div class="label">Kirim pengumuman</div>
+        <div class="input"><textarea id="annText" rows="3" placeholder="Tulis pengumuman singkat…"></textarea></div>
+        <div class="row-end">
+          <button class="btn" id="btnSendAnn"><span class="material">campaign</span> Kirim</button>
+        </div>
+        <div class="time-sub">Pengumuman akan muncul di area karyawan sebagai notifikasi.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Tersimpan.</div>
+
+  <script type="module">
+    // ===== Runtime particles (daun) =====
+    const leavesEl = document.getElementById('leaves');
+    const leafIcons = ['eco','spa','local_florist'];
+    function spawnLeaf() {
+      const s = document.createElement('span');
+      s.className = 'leaf material';
+      s.textContent = leafIcons[Math.floor(Math.random()*leafIcons.length)];
+      s.style.left = Math.random()*100 + 'vw';
+      s.style.fontSize = (18 + Math.random()*18) + 'px';
+      s.style.animationDuration = (6 + Math.random()*8) + 's';
+      leavesEl.appendChild(s);
+      s.addEventListener('animationend', ()=> s.remove());
+    }
+    setInterval(spawnLeaf, 900);
+
+    // ===== Clock & date info =====
+    const clockEl = document.getElementById('clock');
+    const dateInfoEl = document.getElementById('dateInfo');
+    function pad(n){ return String(n).padStart(2,'0'); }
+    setInterval(()=>{
+      const now = new Date();
+      clockEl.textContent = pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());
+      const dnames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+      const mnames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+      dateInfoEl.textContent = `${dnames[now.getDay()]}, ${pad(now.getDate())} ${mnames[now.getMonth()]} ${now.getFullYear()}`;
+    }, 1000);
+
+    // ===== Toast =====
+    const toast = document.getElementById('toast');
+    function showToast(msg, ms=1800){
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(()=> toast.classList.remove('show'), ms);
+    }
+
+    // ===== App Shared (import config & helpers bila ada) =====
+    // Asumsi kamu sudah punya app-shared.js yang expose firebase app, auth, db, storage, env.
+    // Jika belum, masukkan konfigurasi yang sama seperti index.html/karyawan.html untuk konsistensi.
+    // import { auth, db, app, serverTimestamp, signOut, assertAdmin, adminUidList, cloudinary, cloudName, cloudPreset, firebaseApiKey } from './app-shared.js';
+
+    // Untuk menjaga file ini berdiri sendiri, kita tulis bridge ringan berikut.
+    // Ganti nilai-nilai ini sesuai milikmu (SAMA persis dengan file lain di proyek).
+    const ENV = {
+      // Firebase (gunakan config yang sudah kamu pakai di index/karyawan)
+      firebaseConfig: {
+        apiKey: "YOUR_FIREBASE_API_KEY",
+        authDomain: "YOUR_PROJECT.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+      },
+      adminUids: ["ADMIN_UID_1", "ADMIN_UID_2"], // daftar UID admin yang sah
+      // Cloudinary
+      cloudName: "YOUR_CLOUD_NAME",
+      uploadPreset: "YOUR_UNSIGNED_PRESET" // unsigned preset untuk foto profil & bukti
+    };
+
+    // ===== Firebase SDK (modular) =====
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js';
+    import {
+      getAuth, onAuthStateChanged, signOut as fbSignOut
+    } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
+    import {
+      getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc,
+      query, where, orderBy, limit, getDocs, serverTimestamp, Timestamp, deleteDoc
+    } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
+
+    const appFB = initializeApp(ENV.firebaseConfig);
+    const auth = getAuth(appFB);
+    const db = getFirestore(appFB);
+
+    // ===== Strict admin guard =====
+    let currentUser = null;
+    onAuthStateChanged(auth, async (user)=>{
+      if(!user){ location.href = './index.html'; return; }
+      if(!ENV.adminUids.includes(user.uid)){
+        // Logout dan paksa ke index untuk mencegah bypass
+        await fbSignOut(auth);
+        location.href = './index.html';
+        return;
+      }
+      currentUser = user;
+      await bootstrapAdmin();
+    });
+
+    async function bootstrapAdmin(){
+      await Promise.all([
+        loadProfile(),
+        loadPolicy(),
+        loadPendingLeaves(),
+        loadAnnouncements(),
+        initHistoryDefault()
+      ]);
+    }
+
+    // ===== UI Refs =====
+    const ovProfile = document.getElementById('ovProfile');
+    const ovAnn = document.getElementById('ovAnn');
+    const btnProfile = document.getElementById('btnProfile');
+    const btnNotif = document.getElementById('btnNotif'); // saat ini simbolik
+    const btnAnn = document.getElementById('btnAnn');
+    const closeProfile = document.getElementById('closeProfile');
+    const closeAnn = document.getElementById('closeAnn');
+    const btnLogout = document.getElementById('btnLogout');
+    const btnSaveProfile = document.getElementById('btnSaveProfile');
+    const profilePhoto = document.getElementById('profilePhoto');
+    const profileFile = document.getElementById('profileFile');
+    const pfLoad = document.getElementById('pfLoad');
+    const profileName = document.getElementById('profileName');
+    const profileAddr = document.getElementById('profileAddr');
+
+    const btnCreateUser = document.getElementById('btnCreateUser');
+    const btnConfirmUid = document.getElementById('btnConfirmUid');
+    const newEmail = document.getElementById('newEmail');
+    const newPassword = document.getElementById('newPassword');
+    const confirmUid = document.getElementById('confirmUid');
+    const createInfo = document.getElementById('createInfo');
+
+    const dayMon = document.getElementById('dayMon');
+    const dayTue = document.getElementById('dayTue');
+    const dayWed = document.getElementById('dayWed');
+    const dayThu = document.getElementById('dayThu');
+    const dayFri = document.getElementById('dayFri');
+    const daySat = document.getElementById('daySat');
+    const daySun = document.getElementById('daySun');
+    const btnResetDays = document.getElementById('btnResetDays');
+    const btnSaveDays = document.getElementById('btnSaveDays');
+    const btnSendAnn = document.getElementById('btnSendAnn');
+    const annText = document.getElementById('annText');
+    const hariBadge = document.getElementById('hariBadge');
+
+    const leavesList = document.getElementById('leavesList');
+    const btnReloadLeaves = document.getElementById('btnReloadLeaves');
+
+    const annList = document.getElementById('annList');
+    const btnReloadAnn = document.getElementById('btnReloadAnn');
+
+    const rangeKind = document.getElementById('rangeKind');
+    const rangeAnchor = document.getElementById('rangeAnchor');
+    const filterUid = document.getElementById('filterUid');
+    const btnApplyFilter = document.getElementById('btnApplyFilter');
+    const btnExport = document.getElementById('btnExport');
+    const historyBody = document.getElementById('historyBody');
+
+    // ===== Overlay toggles =====
+    btnProfile.addEventListener('click', ()=> ovProfile.classList.add('active'));
+    btnAnn.addEventListener('click', ()=> ovAnn.classList.add('active'));
+    closeProfile.addEventListener('click', ()=> ovProfile.classList.remove('active'));
+    closeAnn.addEventListener('click', ()=> ovAnn.classList.remove('active'));
+    // Ikon notif bisa dipakai untuk reload ringan
+    btnNotif.addEventListener('click', async ()=>{
+      await loadPendingLeaves(); await loadAnnouncements();
+      showToast('Data dimuat ulang');
+    });
+
+    // ===== Profile load/save =====
+    async function loadProfile(){
+      const ref = doc(db, 'users', currentUser.uid);
+      const snap = await getDoc(ref);
+      if(snap.exists()){
+        const d = snap.data();
+        profileName.value = d.name || '';
+        profileAddr.value = d.address || '';
+        if(d.photoUrl) profilePhoto.src = d.photoUrl;
+      }else{
+        // Pastikan dokumen admin ada
+        await setDoc(ref, { role:'admin', createdAt:serverTimestamp() }, { merge:true });
+      }
+    }
+
+    btnLogout.addEventListener('click', async ()=>{
+      await fbSignOut(auth);
+      location.href = './index.html';
+    });
+
+    // Cloudinary unsigned upload (foto profil)
+    profileFile.addEventListener('change', async (e)=>{
+      const file = e.target.files?.[0];
+      if(!file) return;
+      pfLoad.style.display = 'inline-block';
+      try{
+        const form = new FormData();
+        form.append('file', file);
+        form.append('upload_preset', ENV.uploadPreset);
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${ENV.cloudName}/image/upload`, {
+          method:'POST', body: form
+        });
+        const json = await res.json();
+        if(json.secure_url){
+          profilePhoto.src = json.secure_url;
+          await updateDoc(doc(db, 'users', currentUser.uid), { photoUrl: json.secure_url });
+          showToast('Foto profil tersimpan');
+        }else{
+          showToast('Gagal upload foto');
+        }
+      }catch(err){
+        showToast('Upload error');
+      }finally{
+        pfLoad.style.display = 'none';
+      }
+    });
+
+    btnSaveProfile.addEventListener('click', async ()=>{
+      const name = profileName.value.trim();
+      const address = profileAddr.value.trim();
+      await updateDoc(doc(db, 'users', currentUser.uid), { name, address, updatedAt: serverTimestamp() });
+      showToast('Profil disimpan');
+    });
+
+    // ===== Create user (langkah 1 via REST), Konfirmasi UID (langkah 2) =====
+    // Gunakan Firebase Auth REST API untuk create user dari admin panel (service wajib dilindungi).
+    // Syarat: API key aktif dan diizinkan, dan kamu mengaktifkan "Sign up" publik. Alternatif aman: Cloud Function (Admin SDK).
+    async function restCreateUser(email, password){
+      // Endpoint signUp: akan membuat akun baru dan mengembalikan localId (UID).
+      const endpoint = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${ENV.firebaseConfig.apiKey}`;
+      const res = await fetch(endpoint, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password, returnSecureToken: true })
+      });
+      if(!res.ok){
+        const e = await res.json().catch(()=> ({}));
+        throw new Error(e.error?.message || 'SignUp failed');
+      }
+      return res.json(); // { localId, email, idToken, refreshToken, expiresIn }
+    }
+
+    btnCreateUser.addEventListener('click', async ()=>{
+      const email = newEmail.value.trim();
+      const pass = newPassword.value;
+      if(!email || pass.length<6){ showToast('Email / kata sandi tidak valid'); return; }
+      createInfo.textContent = 'Membuat akun…';
+      try{
+        const data = await restCreateUser(email, pass);
+        createInfo.textContent = `Akun dibuat. UID: ${data.localId} — Ketik ulang UID ini pada langkah 2.`;
+        confirmUid.focus();
+      }catch(err){
+        createInfo.textContent = 'Gagal membuat akun: ' + err.message;
+      }
+    });
+
+    btnConfirmUid.addEventListener('click', async ()=>{
+      const uid = confirmUid.value.trim();
+      if(!uid){ showToast('Isi UID terlebih dahulu'); return; }
+      // Buat profil role karyawan bila belum ada
+      const uref = doc(db, 'users', uid);
+      const snap = await getDoc(uref);
+      if(!snap.exists()){
+        await setDoc(uref, {
+          role: 'karyawan',
+          createdAt: serverTimestamp(),
+          active: true
+        }, { merge:true });
+      }else{
+        await updateDoc(uref, { role:'karyawan', active:true, updatedAt: serverTimestamp() });
+      }
+      showToast('UID dikonfirmasi & profil karyawan siap');
+      confirmUid.value = '';
+    });
+
+    // ===== Kebijakan hari presensi =====
+    function daysFromState(){
+      return {
+        mon: dayMon.checked, tue: dayTue.checked, wed: dayWed.checked, thu: dayThu.checked,
+        fri: dayFri.checked, sat: daySat.checked, sun: daySun.checked
+      };
+    }
+    function applyDays(d){
+      dayMon.checked = !!d.mon; dayTue.checked=!!d.tue; dayWed.checked=!!d.wed; dayThu.checked=!!d.thu;
+      dayFri.checked = !!d.fri; daySat.checked=!!d.sat; daySun.checked=!!d.sun;
+      const badges = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+      const act = [d.mon,d.tue,d.wed,d.thu,d.fri,d.sat,d.sun].map((v,i)=> v?badges[i]:null).filter(Boolean);
+      hariBadge.textContent = act.length ? `Aktif: ${act.join(', ')}` : 'Semua non-aktif';
+    }
+    async function loadPolicy(){
+      const ref = doc(db, 'meta', 'policy');
+      const snap = await getDoc(ref);
+      if(snap.exists()){
+        applyDays(snap.data().days || { mon:true,tue:true,wed:true,thu:true,fri:true,sat:true,sun:false });
+      }else{
+        applyDays({ mon:true,tue:true,wed:true,thu:true,fri:true,sat:true,sun:false });
+      }
+    }
+    btnResetDays.addEventListener('click', ()=>{
+      applyDays({ mon:true,tue:true,wed:true,thu:true,fri:true,sat:true,sun:false });
+    });
+    btnSaveDays.addEventListener('click', async ()=>{
+      const ref = doc(db, 'meta', 'policy');
+      await setDoc(ref, { days: daysFromState(), updatedAt: serverTimestamp() }, { merge:true });
+      showToast('Kebijakan hari disimpan');
+      await loadPolicy();
+    });
+
+    // ===== Pengumuman =====
+    async function loadAnnouncements(){
+      annList.textContent = 'Memuat…';
+      const qy = query(collection(db, 'announcements'), orderBy('createdAt','desc'), limit(20));
+      const sn = await getDocs(qy);
+      if(sn.empty){ annList.textContent = 'Belum ada pengumuman.'; return; }
+      const frag = document.createDocumentFragment();
+      sn.forEach(docu=>{
+        const d = docu.data();
+        const div = document.createElement('div');
+        div.className = 'row';
+        div.style.alignItems = 'center';
+        div.style.justifyContent = 'space-between';
+        div.innerHTML = `
+          <div>
+            <div style="font-weight:600">${d.text || ''}</div>
+            <div class="time-sub">${d.authorName || 'Admin'} • ${formatTS(d.createdAt)}</div>
+          </div>
+          <span class="material" style="color:#8D6E63">campaign</span>
+        `;
+        frag.appendChild(div);
+      });
+      annList.innerHTML = '';
+      annList.appendChild(frag);
+    }
+    btnReloadAnn.addEventListener('click', loadAnnouncements);
+
+    btnSendAnn.addEventListener('click', async ()=>{
+      const text = annText.value.trim();
+      if(!text){ showToast('Teks pengumuman kosong'); return; }
+      const authorSnap = await getDoc(doc(db,'users', currentUser.uid));
+      await addDoc(collection(db, 'announcements'), {
+        text,
+        authorUid: currentUser.uid,
+        authorName: authorSnap.exists()? (authorSnap.data().name||'Admin') : 'Admin',
+        createdAt: serverTimestamp()
+      });
+      annText.value = '';
+      showToast('Pengumuman terkirim');
+      await loadAnnouncements();
+    });
+
+    // ===== Cuti: daftar pending, setujui/tolak =====
+    async function loadPendingLeaves(){
+      leavesList.textContent = 'Memuat…';
+      const qy = query(collection(db, 'leaves'), where('status','==','pending'), orderBy('createdAt','asc'), limit(50));
+      const sn = await getDocs(qy);
+      if(sn.empty){ leavesList.textContent = 'Tidak ada permintaan cuti.'; return; }
+      const frag = document.createDocumentFragment();
+      sn.forEach(docu=>{
+        const d = docu.data();
+        const wrap = document.createElement('div');
+        wrap.className = 'card';
+        wrap.style.padding = '10px';
+        wrap.style.marginBottom = '10px';
+        wrap.innerHTML = `
+          <div style="font-weight:700; margin-bottom:6px">${d.userName || d.userUid}</div>
+          <div class="time-sub">Rentang: ${fmtDateOnly(d.start)} → ${fmtDateOnly(d.end)}</div>
+          <div class="time-sub">Alasan: ${d.reason || '-'}</div>
+          <div class="row-end" style="margin-top:8px">
+            <button class="btn small" data-approve="${docu.id}"><span class="material">task_alt</span> Setujui</button>
+            <button class="btn danger small" data-reject="${docu.id}"><span class="material">close</span> Tolak</button>
+          </div>
+        `;
+        frag.appendChild(wrap);
+      });
+      leavesList.innerHTML = '';
+      leavesList.appendChild(frag);
+
+      leavesList.querySelectorAll('[data-approve]').forEach(b=>{
+        b.addEventListener('click', ()=> processLeave(b.dataset.approve, true));
+      });
+      leavesList.querySelectorAll('[data-reject]').forEach(b=>{
+        b.addEventListener('click', ()=> processLeave(b.dataset.reject, false));
+      });
+    }
+    btnReloadLeaves.addEventListener('click', loadPendingLeaves);
+
+    async function processLeave(id, approve){
+      const ref = doc(db, 'leaves', id);
+      const snap = await getDoc(ref);
+      if(!snap.exists()){ showToast('Permintaan tidak ditemukan'); return; }
+      const d = snap.data();
+      const newStatus = approve ? 'approved' : 'rejected';
+      await updateDoc(ref, { status: newStatus, decidedAt: serverTimestamp(), decidedBy: currentUser.uid });
+
+      // Notifikasi sederhana → tambahkan ke collection 'notifications' agar karyawan dapat menarik.
+      await addDoc(collection(db, 'notifications'), {
+        userUid: d.userUid,
+        kind: 'leave',
+        status: newStatus,
+        message: approve ? 'Cuti disetujui' : 'Cuti ditolak',
+        createdAt: serverTimestamp()
+      });
+
+      // Jika disetujui: tandai rentang tanggal sebagai "izin disetujui" pada log presensi
+      if(approve){
+        const days = enumerateDates(d.start, d.end);
+        for(const iso of days){
+          const hRef = doc(db, 'attendance', `${d.userUid}_${iso}`);
+          await setDoc(hRef, {
+            userUid: d.userUid,
+            date: iso,
+            status: 'izin disetujui', // tidak dihitung alpa
+            updatedAt: serverTimestamp()
+          }, { merge:true });
+        }
+      }
+
+      showToast(approve ? 'Cuti disetujui' : 'Cuti ditolak');
+      await loadPendingLeaves();
+    }
+
+    // ===== Riwayat presensi: filter & render & export =====
+    function formatTS(ts){
+      if(!ts) return '';
+      const d = ts.seconds ? ts.toDate() : (ts instanceof Date ? ts : new Date());
+      const hh = pad(d.getHours()), mm = pad(d.getMinutes());
+      return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${hh}:${mm}`;
+    }
+    function fmtDateOnly(tsOrIso){
+      if(typeof tsOrIso === 'string') return tsOrIso;
+      const d = tsOrIso?.seconds ? tsOrIso.toDate() : new Date();
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    }
+    function enumerateDates(start, end){
+      const s = new Date(typeof start==='string'? start: fmtDateOnly(start));
+      const e = new Date(typeof end==='string'? end: fmtDateOnly(end));
+      const out = [];
+      for(let d=new Date(s); d<=e; d.setDate(d.getDate()+1)){
+        out.push(`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`);
+      }
+      return out;
+    }
+    function rangeFrom(kind, anchorStr){
+      const base = anchorStr ? new Date(anchorStr) : new Date();
+      const y = base.getFullYear(), m = base.getMonth(), d = base.getDate();
+      if(kind==='harian'){
+        const iso = `${y}-${pad(m+1)}-${pad(d)}`;
+        return { start: iso, end: iso };
+      }
+      if(kind==='mingguan'){
+        const cur = new Date(y, m, d);
+        const day = cur.getDay(); // 0 Minggu..6 Sabtu
+        const mondayOffset = (day+6)%7; // jarak ke Senin
+        const start = new Date(cur); start.setDate(cur.getDate()-mondayOffset);
+        const end = new Date(start); end.setDate(start.getDate()+6);
+        return {
+          start: `${start.getFullYear()}-${pad(start.getMonth()+1)}-${pad(start.getDate())}`,
+          end: `${end.getFullYear()}-${pad(end.getMonth()+1)}-${pad(end.getDate())}`,
+        };
+      }
+      if(kind==='bulanan'){
+        const start = `${y}-${pad(m+1)}-01`;
+        const endDate = new Date(y, m+1, 0).getDate();
+        const end = `${y}-${pad(m+1)}-${pad(endDate)}`;
+        return { start, end };
+      }
+      if(kind==='tahunan'){
+        return { start: `${y}-01-01`, end: `${y}-12-31` };
+      }
+      return { start: `${y}-${pad(m+1)}-${pad(d)}`, end: `${y}-${pad(m+1)}-${pad(d)}` };
+    }
+
+    async function initHistoryDefault(){
+      const today = new Date();
+      rangeAnchor.value = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+      await applyHistoryFilter();
+    }
+
+    btnApplyFilter.addEventListener('click', applyHistoryFilter);
+
+    async function applyHistoryFilter(){
+      historyBody.innerHTML = '';
+      const kind = rangeKind.value;
+      const anchor = rangeAnchor.value;
+      const uid = filterUid.value.trim();
+      const { start, end } = rangeFrom(kind, anchor);
+
+      // Query incremental: tanggal disimpan sebagai key di docId (userUid_isoDate) dan field date (ISO)
+      // Kita tarik per hari untuk menghindari full scan besar, namun tetap efisien untuk rentang pendek-menengah.
+      const dates = enumerateDates(start, end);
+      const rows = [];
+      for(const iso of dates){
+        const qy = uid
+          ? query(collection(db,'attendance'), where('date','==', iso), where('userUid','==', uid))
+          : query(collection(db,'attendance'), where('date','==', iso));
+        const sn = await getDocs(qy);
+        sn.forEach(docu=>{
+          const d = docu.data();
+          rows.push({
+            id: docu.id,
+            date: d.date,
+            userUid: d.userUid,
+            kind: d.kind || '-', // masuk / pulang / izin disetujui / dsb.
+            status: d.status || '-',
+            time: d.createdAt || d.updatedAt || null,
+            lat: d.lat || null,
+            lng: d.lng || null,
+            photoUrl: d.photoUrl || null,
+            photoPublicId: d.photoPublicId || null
+          });
+        });
+      }
+
+      // Render incremental
+      rows.sort((a,b)=> (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+      const frag = document.createDocumentFragment();
+      for(const r of rows){
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${r.date}</td>
+          <td>${r.userUid}</td>
+          <td>${r.kind}</td>
+          <td>
+            <span class="chip ${r.status==='hadir'?'mark-green': (r.status?.includes('izin')?'mark-yellow':'mark-red')}">
+              <span class="material">${r.status==='hadir'?'check_circle': (r.status?.includes('izin')?'pending':'cancel')}</span> ${r.status}
+            </span>
+          </td>
+          <td>${r.time ? formatTS(r.time) : '-'}</td>
+          <td>${r.lat && r.lng ? `${r.lat}, ${r.lng}` : '-'}</td>
+          <td>${r.photoUrl ? `<a href="${r.photoUrl}" target="_blank" rel="noopener">Lihat</a>` : '-'}</td>
+          <td><button class="btn danger small" data-del="${r.id}"><span class="material">delete</span> Hapus</button></td>
+        `;
+        frag.appendChild(tr);
+      }
+      historyBody.appendChild(frag);
+
+      // Bind hapus
+      historyBody.querySelectorAll('[data-del]').forEach(btn=>{
+        btn.addEventListener('click', ()=> handleDelete(btn.dataset.del));
+      });
+
+      // Simpan cache kecil di window untuk export
+      window.__histRows = rows;
+    }
+
+    // Export CSV dari baris yang difilter
+    btnExport.addEventListener('click', ()=>{
+      const rows = window.__histRows || [];
+      const header = ['Tanggal','UID','Jenis','Status','Waktu','Latitude','Longitude','FotoURL'];
+      const lines = [header.join(',')];
+      for(const r of rows){
+        const cells = [
+          r.date, r.userUid, r.kind, r.status,
+          r.time ? formatTS(r.time) : '',
+          r.lat ?? '', r.lng ?? '', r.photoUrl ?? ''
+        ].map(v=> `"${String(v).replace(/"/g,'""')}"`);
+        lines.push(cells.join(','));
+      }
+      const blob = new Blob([lines.join('\n')], { type:'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `riwayat-presensi-${Date.now()}.csv`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // ===== Hapus riwayat: Cloudinary overwrite 1x1 + bersihkan Firestore =====
+    async function handleDelete(docId){
+      // docId = `${userUid}_${iso}` atau id unik lain
+      const ref = doc(db, 'attendance', docId);
+      const snap = await getDoc(ref);
+      if(!snap.exists()){ showToast('Record tidak ditemukan'); return; }
+      const d = snap.data();
+
+      // Overwrite Cloudinary dengan 1x1 untuk "mengosongkan" konten di public_id yang sama.
+      // Catatan: overwrite aman dilakukan via upload API dengan public_id yang sama dan file 1x1 transparan (data URL).
+      if(d.photoPublicId){
+        try{
+          const onePx = makeOnePxPngDataUrl(); // data URL PNG 1x1
+          const form = new FormData();
+          form.append('file', onePx);
+          form.append('public_id', d.photoPublicId);
+          form.append('overwrite', 'true');
+          form.append('upload_preset', ENV.uploadPreset);
+          await fetch(`https://api.cloudinary.com/v1_1/${ENV.cloudName}/image/upload`, { method:'POST', body: form });
+        }catch(e){
+          // lanjutkan pembersihan Firestore walau overwrite gagal
+        }
+      }
+
+      await deleteDoc(ref);
+      showToast('Record dihapus');
+      await applyHistoryFilter();
+    }
+
+    function makeOnePxPngDataUrl(){
+      // Buat PNG 1x1 transparan sebagai data URL
+      const c = document.createElement('canvas');
+      c.width = 1; c.height = 1;
+      return c.toDataURL('image/png');
+    }
+
+    // ===== Minor UX =====
+    document.addEventListener('keydown', (e)=>{
+      if(e.key==='Escape'){
+        ovProfile.classList.remove('active');
+        ovAnn.classList.remove('active');
+      }
+    });
+
+  </script>
+</body>
+</html>
